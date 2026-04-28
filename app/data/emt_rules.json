@@ -1,0 +1,82 @@
+[
+  {
+    "field_code": "00005",
+    "label": "File_Generation_Date_And_Time",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00006",
+    "label": "EMT_Data_Reporting_Target_Market",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00007",
+    "label": "EMT_Data_Reporting_Ex_Ante",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00008",
+    "label": "EMT_Data_Reporting_Ex_Post",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00045",
+    "label": "Financial_Instrument_Performance_Fee",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00047",
+    "label": "Financial_Instrument_Distribution_Of_Cash",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00050",
+    "label": "General_Reference_Date",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00060",
+    "label": "Financial_Instrument_Product_Type",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00070",
+    "label": "Financial_Instrument_Manufacturer_Name",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  },
+  {
+    "field_code": "00100",
+    "label": "Leveraged_Financial_Instrument_Or_Contingent_Liability_Instrument",
+    "rule_type": "expect_value",
+    "condition": null,
+    "allowed_values": null,
+    "description": "Always mandatory"
+  }
+]
