@@ -2,733 +2,1065 @@
   {
     "field_code": "00005",
     "label": "File_Generation_Date_And_Time",
+    "field_type": "datetime",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00006",
     "label": "EMT_Data_Reporting_Target_Market",
+    "field_type": "boolean",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00007",
     "label": "EMT_Data_Reporting_Ex_Ante",
+    "field_type": "boolean",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00008",
     "label": "EMT_Data_Reporting_Ex_Post",
+    "field_type": "boolean",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00045",
     "label": "Financial_Instrument_Performance_Fee",
+    "field_type": "boolean",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00047",
     "label": "Financial_Instrument_Distribution_Of_Cash",
+    "field_type": "boolean",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00050",
     "label": "General_Reference_Date",
+    "field_type": "date",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00060",
     "label": "Financial_Instrument_Product_Type",
+    "field_type": "string",
+    "allowed_values": ["S", "SF", "U", "N", "UM", "NM", "ETC", "B"],
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00070",
     "label": "Financial_Instrument_Manufacturer_Name",
+    "field_type": "string",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00100",
     "label": "Leveraged_Financial_Instrument_Or_Contingent_Liability_Instrument",
+    "field_type": "boolean",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": null,
-    "allowed_values": null,
     "description": "Always mandatory"
   },
   {
     "field_code": "00067",
     "label": "May_Be_Terminated_Early",
+    "field_type": "boolean",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "in_set",
       "field_code": "00060",
       "values": ["S", "SF", "B"]
     },
-    "allowed_values": null,
     "description": "Mandatory when product type is S, SF, or B"
   },
   {
     "field_code": "00085",
     "label": "Financial_Instrument_Type_Notional_Or_Item_Based",
+    "field_type": "string",
+    "allowed_values": ["N", "I"],
     "rule_type": "expect_value",
     "condition": {
       "operator": "in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Mandatory for structured securities (S, ETC, B)"
   },
   {
     "field_code": "00085",
     "label": "Financial_Instrument_Type_Notional_Or_Item_Based",
+    "field_type": "string",
+    "allowed_values": ["N", "I"],
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "00095",
     "label": "Structured_Securities_Product_Category_Or_Nature",
+    "field_type": "string",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "00096",
     "label": "Structured_Securities_Quotation",
+    "field_type": "string",
+    "allowed_values": ["U", "P"],
     "rule_type": "expect_value",
     "condition": {
       "operator": "in_set",
       "field_code": "00060",
       "values": ["S", "ETC"]
     },
-    "allowed_values": null,
     "description": "Mandatory when product type is S or ETC"
   },
   {
     "field_code": "00096",
     "label": "Structured_Securities_Quotation",
+    "field_type": "string",
+    "allowed_values": ["U", "P"],
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "00110",
     "label": "Fund_Share_Class_Without_Retrocession",
+    "field_type": "boolean",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Mandatory when product type is not S, ETC, or B"
   },
   {
     "field_code": "01000",
     "label": "Target_Market_Reference_Date",
+    "field_type": "date",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "eq",
       "field_code": "00006",
       "value": "Y"
     },
-    "allowed_values": null,
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "01010",
     "label": "Investor_Type_Retail",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "01020",
     "label": "Investor_Type_Professional",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "P", "E"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "01030",
     "label": "Investor_Type_Eligible_Counterparty",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
+    "field_type": "boolean",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "02010",
     "label": "Basic_Investor",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "02020",
     "label": "Informed_Investor",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "02030",
     "label": "Advanced_Investor",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "03010",
     "label": "Compatible_With_Clients_Who_Can_Not_Bear_Capital_Loss",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "03020",
     "label": "Compatible_With_Clients_Who_Can_Bear_Limited_Capital_Loss",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00006", "value": "Y" },
-        { "operator": "in_set", "field_code": "00060", "values": ["UM", "NM"] }
+        {
+          "operator": "eq",
+          "field_code": "00006",
+          "value": "Y"
+        },
+        {
+          "operator": "in_set",
+          "field_code": "00060",
+          "values": ["UM", "NM"]
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00006 is Y and product type is UM or NM"
   },
   {
     "field_code": "03040",
     "label": "Compatible_With_Clients_Who_Do_Not_Need_Capital_Guarantee",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "03050",
     "label": "Compatible_With_Clients_Who_Can_Bear_Loss_Beyond_Capital",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "05010",
     "label": "Return_Profile_Client_Looking_For_Preservation",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "05020",
     "label": "Return_Profile_Client_Looking_For_Capital_Growth",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "05030",
     "label": "Return_Profile_Client_Looking_For_Income",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "05040",
     "label": "Return_Profile_Hedging",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00006", "value": "Y" },
-        { "operator": "in_set", "field_code": "00060", "values": ["S", "ETC", "B"] }
+        {
+          "operator": "eq",
+          "field_code": "00006",
+          "value": "Y"
+        },
+        {
+          "operator": "in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00006 is Y and product type is structured security (S, ETC, B)"
   },
   {
     "field_code": "05040",
     "label": "Return_Profile_Hedging",
+    "field_type": "string",
+    "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "05080",
     "label": "Minimum_Recommended_Holding_Period",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
+    "field_type": "string",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "05105",
     "label": "Does_This_Financial_Instrument_Consider_End_Client_Sustainability_Preferences",
+    "field_type": "string",
+    "allowed_values": ["Y", "Neutral"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "05115",
     "label": "Other_Specific_Investment_Need",
+    "field_type": "string",
+    "allowed_values": ["N", "I", "O"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "06010",
     "label": "Execution_Only",
+    "field_type": "string",
+    "allowed_values": ["R", "P", "B", "N"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "06020",
     "label": "Execution_With_Appropriateness_Test_Or_Non_Advised_Services",
+    "field_type": "string",
+    "allowed_values": ["R", "P", "B", "N"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "06030",
     "label": "Investment_Advice",
+    "field_type": "string",
+    "allowed_values": ["R", "P", "B", "N"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "06040",
     "label": "Portfolio_Management",
+    "field_type": "string",
+    "allowed_values": ["R", "P", "B", "N"],
     "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00006", "value": "Y" },
-    "allowed_values": null,
+    "condition": {
+      "operator": "eq",
+      "field_code": "00006",
+      "value": "Y"
+    },
     "description": "Mandatory when 00006 is Y"
   },
   {
     "field_code": "07020",
     "label": "Gross_One-off_Cost_Financial_Instrument_Maximum_Entry_Cost_Non_Acquired",
+    "field_type": "percentage",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00007", "value": "Y" },
-        { "operator": "in_set", "field_code": "00060", "values": ["S", "ETC", "B"] }
+        {
+          "operator": "eq",
+          "field_code": "00007",
+          "value": "Y"
+        },
+        {
+          "operator": "in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00007 is Y and product type is S, ETC, or B"
   },
   {
     "field_code": "07090",
     "label": "One-off_Cost_Financial_Instrument_Exit_Cost_Structured_Products_Prior_RHP",
+    "field_type": "percentage",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00007", "value": "Y" },
-        { "operator": "in_set", "field_code": "00060", "values": ["S", "ETC", "B"] }
+        {
+          "operator": "eq",
+          "field_code": "00007",
+          "value": "Y"
+        },
+        {
+          "operator": "in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00007 is Y and product type is S, ETC, or B"
   },
   {
     "field_code": "07100",
     "label": "Financial_Instrument_Gross_Ongoing_Costs",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00007", "value": "Y" },
+    "field_type": "percentage",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "00007",
+      "value": "Y"
+    },
     "description": "Mandatory when 00007 is Y"
   },
   {
     "field_code": "07110",
     "label": "Financial_Instrument_Management_Fee",
+    "field_type": "percentage",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00007", "value": "Y" },
-        { "operator": "not_in_set", "field_code": "00060", "values": ["S", "ETC", "B"] }
+        {
+          "operator": "eq",
+          "field_code": "00007",
+          "value": "Y"
+        },
+        {
+          "operator": "not_in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00007 is Y and product type is not S, ETC, or B"
   },
   {
     "field_code": "07130",
     "label": "Financial_Instrument_Transaction_Costs_Ex_Ante",
+    "field_type": "percentage",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00007", "value": "Y" },
-        { "operator": "not_in_set", "field_code": "00060", "values": ["S", "ETC", "B"] }
+        {
+          "operator": "eq",
+          "field_code": "00007",
+          "value": "Y"
+        },
+        {
+          "operator": "not_in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00007 is Y and product type is not S, ETC, or B"
   },
   {
     "field_code": "07140",
     "label": "Financial_Instrument_Incidental_Costs_Ex_Ante",
+    "field_type": "percentage",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00007", "value": "Y" },
-        { "operator": "eq", "field_code": "00045", "value": "Y" }
+        {
+          "operator": "eq",
+          "field_code": "00007",
+          "value": "Y"
+        },
+        {
+          "operator": "eq",
+          "field_code": "00045",
+          "value": "Y"
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00007 is Y and 00045 is Y"
   },
   {
     "field_code": "07150",
     "label": "Structured_Securities_Reference_Price_Ex_Ante",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00007", "value": "Y" },
-        { "operator": "in_set", "field_code": "00060", "values": ["S", "ETC", "B"] },
-        { "operator": "is_empty", "field_code": "07155" }
+        {
+          "operator": "eq",
+          "field_code": "00007",
+          "value": "Y"
+        },
+        {
+          "operator": "in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        },
+        {
+          "operator": "is_empty",
+          "field_code": "07155"
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00007 is Y, product is structured security, and 07155 is empty"
   },
   {
     "field_code": "07150",
     "label": "Structured_Securities_Reference_Price_Ex_Ante",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "07155",
     "label": "Structured_Securities_Notional_Reference_Amount_Ex_Ante",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00007", "value": "Y" },
-        { "operator": "in_set", "field_code": "00060", "values": ["S", "ETC", "B"] },
-        { "operator": "neq", "field_code": "00085", "value": "I" },
-        { "operator": "is_empty", "field_code": "07150" }
+        {
+          "operator": "eq",
+          "field_code": "00007",
+          "value": "Y"
+        },
+        {
+          "operator": "in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        },
+        {
+          "operator": "neq",
+          "field_code": "00085",
+          "value": "I"
+        },
+        {
+          "operator": "is_empty",
+          "field_code": "07150"
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00007 is Y, product is structured security, 00085 is not I, and 07150 is empty"
   },
   {
     "field_code": "07155",
     "label": "Structured_Securities_Notional_Reference_Amount_Ex_Ante",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "07160",
     "label": "Ex_Ante_Costs_Reference_Date",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00007", "value": "Y" },
+    "field_type": "date",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "00007",
+      "value": "Y"
+    },
     "description": "Mandatory when 00007 is Y"
   },
   {
     "field_code": "08010",
     "label": "Gross_One-off_Cost_Structured_Securities_Entry_Cost_Ex_Post",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "08015",
     "label": "Net_One-off_Cost_Structured_Securities_Entry_Cost_Ex_Post",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "08020",
     "label": "One-off_Costs_Structured_Securities_Exit_Cost_Ex_Post",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "08030",
     "label": "Financial_Instrument_Ongoing_Costs_Ex_Post",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00008", "value": "Y" },
+    "field_type": "percentage",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "00008",
+      "value": "Y"
+    },
     "description": "Mandatory when 00008 is Y"
   },
   {
     "field_code": "08040",
     "label": "Structured_Securities_Ongoing_Costs_Ex_Post_Accumulated",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "08050",
     "label": "Financial_Instrument_Management_Fee_Ex_Post",
+    "field_type": "percentage",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00008", "value": "Y" },
-        { "operator": "not_in_set", "field_code": "00060", "values": ["S", "ETC", "B"] }
+        {
+          "operator": "eq",
+          "field_code": "00008",
+          "value": "Y"
+        },
+        {
+          "operator": "not_in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00008 is Y and product type is not S, ETC, or B"
   },
   {
     "field_code": "08070",
     "label": "Financial_Instrument_Transaction_Costs_Ex_Post",
+    "field_type": "percentage",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00008", "value": "Y" },
-        { "operator": "not_in_set", "field_code": "00060", "values": ["S", "ETC", "B"] }
+        {
+          "operator": "eq",
+          "field_code": "00008",
+          "value": "Y"
+        },
+        {
+          "operator": "not_in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00008 is Y and product type is not S, ETC, or B"
   },
   {
     "field_code": "08080",
     "label": "Financial_Instrument_Incidental_Costs_Ex_Post",
+    "field_type": "percentage",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00008", "value": "Y" },
-        { "operator": "eq", "field_code": "00045", "value": "Y" }
+        {
+          "operator": "eq",
+          "field_code": "00008",
+          "value": "Y"
+        },
+        {
+          "operator": "eq",
+          "field_code": "00045",
+          "value": "Y"
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00008 is Y and 00045 is Y"
   },
   {
     "field_code": "08090",
     "label": "Beginning_Of_Reference_Period",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00008", "value": "Y" },
+    "field_type": "date",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "00008",
+      "value": "Y"
+    },
     "description": "Mandatory when 00008 is Y"
   },
   {
     "field_code": "08100",
     "label": "End_Of_Reference_Period",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "00008", "value": "Y" },
+    "field_type": "date",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "00008",
+      "value": "Y"
+    },
     "description": "Mandatory when 00008 is Y"
   },
   {
     "field_code": "08110",
     "label": "Structured_Securities_Reference_Price_Ex_Post",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00008", "value": "Y" },
-        { "operator": "in_set", "field_code": "00060", "values": ["S", "ETC", "B"] },
-        { "operator": "is_empty", "field_code": "08120" }
+        {
+          "operator": "eq",
+          "field_code": "00008",
+          "value": "Y"
+        },
+        {
+          "operator": "in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        },
+        {
+          "operator": "is_empty",
+          "field_code": "08120"
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00008 is Y, product is structured security, and 08120 is empty"
   },
   {
     "field_code": "08110",
     "label": "Structured_Securities_Reference_Price_Ex_Post",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "08120",
     "label": "Structured_Securities_Notional_Reference_Amount",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "00008", "value": "Y" },
-        { "operator": "in_set", "field_code": "00060", "values": ["S", "ETC", "B"] },
-        { "operator": "neq", "field_code": "00085", "value": "I" },
-        { "operator": "is_empty", "field_code": "08110" }
+        {
+          "operator": "eq",
+          "field_code": "00008",
+          "value": "Y"
+        },
+        {
+          "operator": "in_set",
+          "field_code": "00060",
+          "values": ["S", "ETC", "B"]
+        },
+        {
+          "operator": "neq",
+          "field_code": "00085",
+          "value": "I"
+        },
+        {
+          "operator": "is_empty",
+          "field_code": "08110"
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 00008 is Y, product is structured security, 00085 is not I, and 08110 is empty"
   },
   {
     "field_code": "08120",
     "label": "Structured_Securities_Notional_Reference_Amount",
+    "field_type": "decimal",
+    "allowed_values": null,
     "rule_type": "expect_empty",
     "condition": {
       "operator": "not_in_set",
       "field_code": "00060",
       "values": ["S", "ETC", "B"]
     },
-    "allowed_values": null,
     "description": "Not applicable for non-structured security product types"
   },
   {
     "field_code": "09040",
     "label": "Is_Assessment_Of_Value_Required_Under_COLL_UK",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "09030", "value": "Y" },
+    "field_type": "boolean",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "09030",
+      "value": "Y"
+    },
     "description": "Mandatory when 09030 is Y"
   },
   {
     "field_code": "09050",
     "label": "Outcome_Of_COLL_Assessment_Of_Value_UK",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "09040", "value": "Y" },
+    "field_type": "integer",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "09040",
+      "value": "Y"
+    },
     "description": "Mandatory when 09040 is Y"
   },
   {
     "field_code": "09060",
     "label": "Outcome_Of_PRIN_Value_Assessment_Or_Review_UK",
+    "field_type": "integer",
+    "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "09030", "value": "Y" },
-        { "operator": "eq", "field_code": "09040", "value": "N" },
-        { "operator": "is_empty", "field_code": "09070" }
+        {
+          "operator": "eq",
+          "field_code": "09030",
+          "value": "Y"
+        },
+        {
+          "operator": "eq",
+          "field_code": "09040",
+          "value": "N"
+        },
+        {
+          "operator": "is_empty",
+          "field_code": "09070"
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 09030 is Y, 09040 is N, and 09070 is empty"
   },
   {
     "field_code": "09070",
     "label": "Other_Review_Related_To_Value_And_Or_Charges_UK",
+    "field_type": "string",
+    "allowed_values": ["A", "O"],
     "rule_type": "expect_value",
     "condition": {
       "operator": "and",
       "conditions": [
-        { "operator": "eq", "field_code": "09030", "value": "Y" },
-        { "operator": "eq", "field_code": "09040", "value": "N" },
-        { "operator": "is_empty", "field_code": "09060" }
+        {
+          "operator": "eq",
+          "field_code": "09030",
+          "value": "Y"
+        },
+        {
+          "operator": "eq",
+          "field_code": "09040",
+          "value": "N"
+        },
+        {
+          "operator": "is_empty",
+          "field_code": "09060"
+        }
       ]
     },
-    "allowed_values": null,
     "description": "Mandatory when 09030 is Y, 09040 is N, and 09060 is empty"
   },
   {
     "field_code": "09090",
     "label": "Review_Date_UK",
-    "rule_type": "expect_value",
-    "condition": { "operator": "eq", "field_code": "09030", "value": "Y" },
+    "field_type": "date",
     "allowed_values": null,
+    "rule_type": "expect_value",
+    "condition": {
+      "operator": "eq",
+      "field_code": "09030",
+      "value": "Y"
+    },
     "description": "Mandatory when 09030 is Y"
   }
 ]

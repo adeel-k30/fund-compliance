@@ -21,14 +21,29 @@ class Condition(BaseModel):
 Condition.model_rebuild()
 
 class RuleType(str, Enum):
+    FORMAT = 'format'
+    ALLOWED_VALUES = 'allowed_values'
     EXPECT_VALUE = 'expect_value'
     EXPECT_EMPTY = 'expect_empty'
     CUSTOM = 'custom'
 
+class FieldType(str, Enum):
+    STRING = 'string'
+    INTEGER = 'integer'
+    DECIMAL = 'decimal'
+    PERCENTAGE = 'percentage'
+    DATE = 'date'
+    DATETIME = 'datetime'
+    BOOLEAN = 'boolean'
+    ISIN = 'isin'
+    LEI = 'lei'
+
+
 class FieldRule(BaseModel):
     field_code: str = Field(..., max_length=5)
     label: str
+    field_type: FieldType | None = None
+    allowed_values: list[str] | None = None
     rule_type: RuleType
     condition: Condition | None = None
-    allowed_values: list[str] | None = None
     description: str | None = None
