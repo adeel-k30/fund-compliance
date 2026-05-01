@@ -148,6 +148,7 @@ class RuleEngine():
 
                     ))
                     validated_row[rule.field_code] = None # Clear invalid value for pass 2 rules
+                    continue # Skip allowed values check if format is invalid
 
             if rule.allowed_values:
                 error = self._validate_allowed_values(field_value, rule.allowed_values)
@@ -165,7 +166,7 @@ class RuleEngine():
 
         # Pass 2 — mandatory and conditional rules using validated_row
         for rule in self.rules:
-            if rule.condition is None or self._evaluate_condition(rule.condition, row):
+            if rule.condition is None or self._evaluate_condition(rule.condition, validated_row):
                 field_value = validated_row.get(rule.field_code)
                 if rule.rule_type == RuleType.EXPECT_VALUE and self._is_empty(field_value):
                     issues.append(ValidationIssue(

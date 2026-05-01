@@ -65,7 +65,7 @@
   {
     "field_code": "00060",
     "label": "Financial_Instrument_Product_Type",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["S", "SF", "U", "N", "UM", "NM", "ETC", "B"],
     "rule_type": "expect_value",
     "condition": null,
@@ -105,7 +105,7 @@
   {
     "field_code": "00085",
     "label": "Financial_Instrument_Type_Notional_Or_Item_Based",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["N", "I"],
     "rule_type": "expect_value",
     "condition": {
@@ -118,7 +118,7 @@
   {
     "field_code": "00085",
     "label": "Financial_Instrument_Type_Notional_Or_Item_Based",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["N", "I"],
     "rule_type": "expect_empty",
     "condition": {
@@ -144,7 +144,7 @@
   {
     "field_code": "00096",
     "label": "Structured_Securities_Quotation",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["U", "P"],
     "rule_type": "expect_value",
     "condition": {
@@ -157,7 +157,7 @@
   {
     "field_code": "00096",
     "label": "Structured_Securities_Quotation",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["U", "P"],
     "rule_type": "expect_empty",
     "condition": {
@@ -196,7 +196,7 @@
   {
     "field_code": "01010",
     "label": "Investor_Type_Retail",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -209,7 +209,7 @@
   {
     "field_code": "01020",
     "label": "Investor_Type_Professional",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "P", "E"],
     "rule_type": "expect_value",
     "condition": {
@@ -235,7 +235,7 @@
   {
     "field_code": "02010",
     "label": "Basic_Investor",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -248,7 +248,7 @@
   {
     "field_code": "02020",
     "label": "Informed_Investor",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -261,7 +261,7 @@
   {
     "field_code": "02030",
     "label": "Advanced_Investor",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -274,7 +274,7 @@
   {
     "field_code": "03010",
     "label": "Compatible_With_Clients_Who_Can_Not_Bear_Capital_Loss",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -287,7 +287,7 @@
   {
     "field_code": "03020",
     "label": "Compatible_With_Clients_Who_Can_Bear_Limited_Capital_Loss",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -310,7 +310,7 @@
   {
     "field_code": "03040",
     "label": "Compatible_With_Clients_Who_Do_Not_Need_Capital_Guarantee",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -323,7 +323,7 @@
   {
     "field_code": "03050",
     "label": "Compatible_With_Clients_Who_Can_Bear_Loss_Beyond_Capital",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -336,7 +336,7 @@
   {
     "field_code": "05010",
     "label": "Return_Profile_Client_Looking_For_Preservation",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -349,7 +349,7 @@
   {
     "field_code": "05020",
     "label": "Return_Profile_Client_Looking_For_Capital_Growth",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -362,7 +362,7 @@
   {
     "field_code": "05030",
     "label": "Return_Profile_Client_Looking_For_Income",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -375,7 +375,7 @@
   {
     "field_code": "05040",
     "label": "Return_Profile_Hedging",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -398,7 +398,7 @@
   {
     "field_code": "05040",
     "label": "Return_Profile_Hedging",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "N", "Neutral"],
     "rule_type": "expect_empty",
     "condition": {
@@ -424,7 +424,7 @@
   {
     "field_code": "05105",
     "label": "Does_This_Financial_Instrument_Consider_End_Client_Sustainability_Preferences",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["Y", "Neutral"],
     "rule_type": "expect_value",
     "condition": {
@@ -437,7 +437,7 @@
   {
     "field_code": "05115",
     "label": "Other_Specific_Investment_Need",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["N", "I", "O"],
     "rule_type": "expect_value",
     "condition": {
@@ -450,7 +450,7 @@
   {
     "field_code": "06010",
     "label": "Execution_Only",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["R", "P", "B", "N"],
     "rule_type": "expect_value",
     "condition": {
@@ -463,7 +463,7 @@
   {
     "field_code": "06020",
     "label": "Execution_With_Appropriateness_Test_Or_Non_Advised_Services",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["R", "P", "B", "N"],
     "rule_type": "expect_value",
     "condition": {
@@ -476,7 +476,7 @@
   {
     "field_code": "06030",
     "label": "Investment_Advice",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["R", "P", "B", "N"],
     "rule_type": "expect_value",
     "condition": {
@@ -489,7 +489,7 @@
   {
     "field_code": "06040",
     "label": "Portfolio_Management",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["R", "P", "B", "N"],
     "rule_type": "expect_value",
     "condition": {
@@ -1026,7 +1026,7 @@
   {
     "field_code": "09070",
     "label": "Other_Review_Related_To_Value_And_Or_Charges_UK",
-    "field_type": "string",
+    "field_type": null,
     "allowed_values": ["A", "O"],
     "rule_type": "expect_value",
     "condition": {
