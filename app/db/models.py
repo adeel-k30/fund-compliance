@@ -1,0 +1,49 @@
+import uuid
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Text
+from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
+
+from app.db.session import Base
+
+
+class Client(Base):
+    __tablename__ = "clients"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    uploads = relationship("Upload", back_populates="client")
+
+
+class Upload(Base):
+    __tablename__ = "uploads"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    client_id = Column(String, ForeignKey("clients.id", ondelete="CASCADE"))
+    filename = Column(String, nullable=False)
+    template_type = Column(String, nullable=False)
+    template_version = Column(String, nullable=True)
+    total_rows = Column(Integer)
+    rows_with_issues = Column(Integer)
+    status = Column(String)
+    created_at = Column(DateTime, server_default=func.now())
+
+    client = relationship("Client", back_populates="uploads")
+    validation_issues = relationship("ValidationIssue", back_populates="upload")
+
+
+class ValidationIssue(Base):
+    __tablename__ = "validation_issues"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    upload_id = Column(String, ForeignKey("uploads.id", ondelete="CASCADE"))
+    row_index = Column(Integer, nullable=False)
+    isin = Column(String, nullable=True)
+    instrument_name = Column(String, nullable=True)
+    field_code = Column(String, nullable=False)
+    field_label = Column(String, nullable=False)
+    rule_type = Column(String, nullable=False)
+    message = Column(Text, nullable=False)
+
+    upload = relationship("Upload", back_populates="validation_issues")
