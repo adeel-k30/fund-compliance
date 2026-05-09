@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     app_env: str = "development"
     database_url: str = "postgresql+asyncpg://funduser:devpassword@localhost:5433/fundcompliance"
     dev_client_id: str
+    jwt_secret_key: str = "super-secret-key"
+    jwt_algorithm: str = "HS256"
+    jwt_expiry_minutes: int = 30
 
 
 settings = Settings()
