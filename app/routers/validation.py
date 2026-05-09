@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.file_parser import parse_upload
 from app.services.rule_engine import RuleEngine
-from app.db.deps import get_db, get_rule_engine
+from app.db.deps import get_db, get_rule_engine, get_current_user
+from app.db.models import User
 from app.db.repositories.upload_repository import UploadRepository
 from app.schemas.upload import UploadSummary
 from app.models.validation import ValidationReport
@@ -14,6 +15,7 @@ router = APIRouter(
 
 @router.post("/emt")
 async def validate_emt(
+        current_user: User = Depends(get_current_user),
         file: UploadFile = File(...),
         delimiter: str = Form(","),
         db: AsyncSession = Depends(get_db),
@@ -42,6 +44,7 @@ async def validate_emt(
 
     repo = UploadRepository(db)
     upload = await repo.create_upload(  # capture the returned Upload object
+        client_id=current_user.client_id,
         filename=file.filename,
         template_type="EMT", # This is a placeholder, you can implement logic to determine the template type based on the file content or name
         template_version=validation_results.template_version,
@@ -55,24 +58,26 @@ async def validate_emt(
 
 @router.get("/uploads")
 async def get_uploads(
+        current_user: User = Depends(get_current_user),
         skip: int = 0,
         limit: int = 20,
         db: AsyncSession = Depends(get_db)
 ) -> list[UploadSummary]:
 
     repo = UploadRepository(db)
-    uploads = await repo.list_uploads(skip=skip, limit=limit)
+    uploads = await repo.list_uploads(client_id=current_user.client_id, skip=skip, limit=limit)
     return [UploadSummary.model_validate(upload) for upload in uploads] # Use model_validate to convert SQLAlchemy models to Pydantic schemas
 
 
 @router.get("/uploads/{upload_id}")
 async def get_upload(
         upload_id: str,
+        current_user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db)
 ) -> UploadSummary:
 
     repo = UploadRepository(db)
-    upload = await repo.get_upload_by_id(upload_id)
+    upload = await repo.get_upload_by_id(upload_id, client_id=current_user.client_id)
     if not upload:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Upload not found")
     return UploadSummary.model_validate(upload)

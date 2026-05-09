@@ -8,9 +8,9 @@ class UploadRepository:
     def __init__(self, session):
         self.session = session
 
-    async def create_upload(self, filename: str, template_type: str, template_version:str, total_rows: int, rows_with_issues: int) -> Upload:
+    async def create_upload(self, client_id: str, filename: str, template_type: str, template_version:str, total_rows: int, rows_with_issues: int) -> Upload:
         new_upload = Upload(
-            client_id=settings.dev_client_id,  # In a real app, this would come from the authenticated user's client association
+            client_id=client_id,
             filename=filename,
             template_type=template_type,
             template_version=template_version,
@@ -46,13 +46,13 @@ class UploadRepository:
         return len(issues_to_add)
 
 
-    async def get_upload_by_id(self, upload_id: str) -> Upload | None:
-        result = await self.session.execute(select(Upload).where(Upload.id == upload_id))
+    async def get_upload_by_id(self, upload_id: str, client_id: str) -> Upload | None:
+        result = await self.session.execute(select(Upload).where(Upload.id == upload_id).where(Upload.client_id == client_id))
         return result.scalar_one_or_none()
 
 
-    async def list_uploads(self, skip: int = 0, limit: int = 20) -> list[Upload]:
-        result = await self.session.execute(select(Upload).offset(skip).limit(limit).order_by(Upload.created_at.desc()))
+    async def list_uploads(self, client_id: str, skip: int = 0, limit: int = 20) -> list[Upload]:
+        result = await self.session.execute(select(Upload).where(Upload.client_id == client_id).offset(skip).limit(limit).order_by(Upload.created_at.desc()))
         return result.scalars().all()
 
 

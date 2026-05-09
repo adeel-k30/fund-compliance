@@ -8,6 +8,7 @@ from app.models.rules import FieldRule
 from app.services.rule_engine import RuleEngine
 from app.routers.validation import router as validation_router
 from app.routers.client import router as client_router
+from app.routers.auth import router as auth_router
 
 app = FastAPI(title=settings.app_name,
               description="Validates fund data against regulatory requirements",
@@ -15,6 +16,7 @@ app = FastAPI(title=settings.app_name,
 
 app.include_router(validation_router)
 app.include_router(client_router)
+app.include_router(auth_router)
 
 class HealthResponse(BaseModel):
     status: str
