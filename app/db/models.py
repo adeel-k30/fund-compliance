@@ -54,6 +54,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid.uuid4()))
+    client_id = Column(String, ForeignKey("clients.id", ondelete="CASCADE"))
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
