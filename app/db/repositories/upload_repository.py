@@ -2,6 +2,7 @@ from sqlalchemy import select
 
 from app.db.models import Upload, ValidationIssue
 from app.models.validation import ValidationReport
+from app.core.config import settings
 
 class UploadRepository:
     def __init__(self, session):
@@ -9,7 +10,7 @@ class UploadRepository:
 
     async def create_upload(self, filename: str, template_type: str, template_version:str, total_rows: int, rows_with_issues: int) -> Upload:
         new_upload = Upload(
-            client_id="dev-client-001",  # In a real app, this would come from the authenticated user's client association
+            client_id=settings.dev_client_id,  # In a real app, this would come from the authenticated user's client association
             filename=filename,
             template_type=template_type,
             template_version=template_version,

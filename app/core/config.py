@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     app_env: str = "development"
     database_url: str = "postgresql+asyncpg://funduser:devpassword@localhost:5433/fundcompliance"
+    dev_client_id: str
 
 
 settings = Settings()
