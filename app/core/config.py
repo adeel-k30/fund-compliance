@@ -11,6 +11,12 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "super-secret-key"
     jwt_algorithm: str = "HS256"
     jwt_expiry_minutes: int = 30
+    redis_url: str = "redis://localhost:6379/0"
+    s3_bucket_name: str = "fund-compliance-uploads"
+    s3_endpoint_url: str | None = "http://localhost:4566"  # None in production
+    aws_access_key_id: str = "test"  # LocalStack accepts any value
+    aws_secret_access_key: str = "test"  # LocalStack accepts any value
+    aws_region: str = "us-east-1"
 
 
 settings = Settings()
