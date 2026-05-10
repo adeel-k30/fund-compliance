@@ -1,9 +1,16 @@
 import uuid
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Text, Boolean
+from enum import Enum
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Text, Boolean, Enum as SQLAlchemyEnum
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 from app.db.session import Base
+
+class UploadStatus(str, Enum):
+    PENDING = "pending"
+    PROCESSING = "processing"
+    COMPLETE = "complete"
+    FAILED = "failed"
 
 
 class Client(Base):
@@ -27,7 +34,9 @@ class Upload(Base):
     template_version = Column(String, nullable=True)
     total_rows = Column(Integer)
     rows_with_issues = Column(Integer)
-    status = Column(String)
+    status = Column(SQLAlchemyEnum(UploadStatus), nullable=False, default=UploadStatus.PENDING)
+    s3_key = Column(String, nullable=True)
+    task_id = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
 
     client = relationship("Client", back_populates="uploads")

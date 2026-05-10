@@ -2,7 +2,7 @@ from sqlalchemy import select
 
 from app.db.models import Upload, ValidationIssue
 from app.models.validation import ValidationReport
-from app.core.config import settings
+from app.db.models import UploadStatus
 
 class UploadRepository:
     def __init__(self, session):
@@ -16,7 +16,7 @@ class UploadRepository:
             template_version=template_version,
             total_rows=total_rows,
             rows_with_issues=rows_with_issues,
-            status="complete"
+            status=UploadStatus.COMPLETE
         )
         self.session.add(new_upload)
         await self.session.commit()
