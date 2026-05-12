@@ -34,7 +34,7 @@ class Upload(Base):
     template_version = Column(String, nullable=True)
     total_rows = Column(Integer)
     rows_with_issues = Column(Integer)
-    status = Column(SQLAlchemyEnum(UploadStatus), nullable=False, default=UploadStatus.PENDING)
+    status = Column(SQLAlchemyEnum(UploadStatus, values_callable=lambda x: [e.value for e in x]), nullable=False, default=UploadStatus.PENDING)
     s3_key = Column(String, nullable=True)
     task_id = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
