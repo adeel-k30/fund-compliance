@@ -8,21 +8,35 @@ class UploadRepository:
     def __init__(self, session):
         self.session = session
 
-    async def create_upload(self, client_id: str, filename: str, template_type: str, template_version:str, total_rows: int, rows_with_issues: int) -> Upload:
+    async def create_upload(self, upload_id, client_id: str, filename: str, template_type: str, template_version:str, total_rows: int, rows_with_issues: int, status: UploadStatus, s3_key: str) -> Upload:
         new_upload = Upload(
+            id=upload_id,
             client_id=client_id,
             filename=filename,
             template_type=template_type,
             template_version=template_version,
             total_rows=total_rows,
             rows_with_issues=rows_with_issues,
-            status=UploadStatus.COMPLETE
+            status=status,
+            s3_key=s3_key,
         )
         self.session.add(new_upload)
         await self.session.commit()
         await self.session.refresh(new_upload)
 
         return new_upload
+
+
+    async def update_upload(self, upload_id: str, **kwargs) -> Upload | None:
+        upload = await self.session.get(Upload, upload_id)
+        if not upload:
+            return None
+        for key, value in kwargs.items():
+            setattr(upload, key, value)
+
+        await self.session.commit()
+        await self.session.refresh(upload)
+        return upload
 
 
     async def save_validation_issues(self, upload_id: str, validation_report: ValidationReport) -> int:

@@ -1,26 +1,26 @@
+import uuid
+import asyncio
 from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.file_parser import parse_upload
-from app.services.rule_engine import RuleEngine
-from app.db.deps import get_db, get_rule_engine, get_current_user
-from app.db.models import User
+from app.services.s3_service import upload_file_to_s3, delete_file_from_s3
+from app.db.deps import get_db, get_current_user
+from app.db.models import UploadStatus, User
 from app.db.repositories.upload_repository import UploadRepository
-from app.schemas.upload import UploadSummary
-from app.models.validation import ValidationReport
+from app.schemas.upload import UploadSummary, UploadAccepted, UploadStatus as UploadStatusSchema, STATUS_MESSAGES
+from app.worker.tasks import validate_emt_file
 
 router = APIRouter(
     prefix="/validate",
     tags=["validate"])
 
-@router.post("/emt")
+@router.post("/emt", status_code=status.HTTP_202_ACCEPTED)
 async def validate_emt(
         current_user: User = Depends(get_current_user),
         file: UploadFile = File(...),
         delimiter: str = Form(","),
-        db: AsyncSession = Depends(get_db),
-        rule_engine: RuleEngine = Depends(get_rule_engine)
-) -> ValidationReport:
+        db: AsyncSession = Depends(get_db)
+) -> UploadAccepted:
 
     extension = file.filename.split('.')[-1].lower()
     if extension not in ['xlsx', 'xls', 'csv']:
@@ -29,31 +29,51 @@ async def validate_emt(
             detail="Only Excel (.xlsx, .xls) and CSV files are supported"
         )
 
+
+    upload_id = str(uuid.uuid4())
     # Read the files bytes
     contents = await file.read()
 
-    try:
-        rows = parse_upload(file.filename, contents, delimiter)
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+    s3_key = f"uploads/{current_user.client_id}/{upload_id}/{file.filename}"
 
-    validation_results = rule_engine.validate_file(rows, file.filename)
+    # Takes a synchronous (blocking) function and runs it in a separate thread, so the event loop isn't blocked
+    await asyncio.get_event_loop().run_in_executor(None, upload_file_to_s3, contents, s3_key)
 
     repo = UploadRepository(db)
-    upload = await repo.create_upload(  # capture the returned Upload object
-        client_id=current_user.client_id,
-        filename=file.filename,
-        template_type="EMT", # This is a placeholder, you can implement logic to determine the template type based on the file content or name
-        template_version=validation_results.template_version,
-        total_rows=validation_results.total_rows,
-        rows_with_issues=validation_results.rows_with_issues
-    )
-    await repo.save_validation_issues(upload.id, validation_results)
 
-    return  validation_results
+    try:
+        upload = await repo.create_upload(  # capture the returned Upload object
+            upload_id=upload_id,
+            client_id=current_user.client_id,
+            filename=file.filename,
+            template_type="EMT", # This is a placeholder, implement logic to determine the template type based on the file content or name
+            template_version="V4.2",
+            total_rows=0,
+            rows_with_issues=0,
+            status=UploadStatus.PENDING,
+            s3_key= s3_key
+        )
+    except Exception as e:
+        # clean up — delete orphaned S3 file
+        await asyncio.get_event_loop().run_in_executor(None, delete_file_from_s3, s3_key)
+        raise HTTPException(status_code=500, detail="Failed to create upload record")
+
+    # Queue task get task_id
+    task = validate_emt_file.delay(upload_id, s3_key, file.filename, delimiter)
+
+    # Update the upload record with the Celery task ID
+    try:
+        await repo.update_upload(upload_id=upload_id, task_id=task.id)
+    except Exception as e:
+        task.revoke()
+        await asyncio.get_event_loop().run_in_executor(None, delete_file_from_s3, s3_key)
+        raise HTTPException(status_code=500, detail="Failed to update upload record")
+
+    return  UploadAccepted(
+        upload_id=upload.id,
+        task_id=task.id,
+        message="File uploaded successfully. Validation is running in the background."
+    )
 
 
 @router.get("/uploads")
@@ -81,3 +101,24 @@ async def get_upload(
     if not upload:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Upload not found")
     return UploadSummary.model_validate(upload)
+
+
+@router.get("/uploads/{upload_id}/status")
+async def get_upload_status(
+        upload_id: str,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+) -> UploadStatusSchema:
+
+    repo = UploadRepository(db)
+    upload = await repo.get_upload_by_id(upload_id, current_user.client_id)
+
+    if not upload:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Upload not found")
+    return UploadStatusSchema(
+        upload_id=upload.id,
+        status=upload.status,
+        task_id=upload.task_id,
+        total_rows=upload.total_rows,
+        rows_with_issues=upload.rows_with_issues,
+        message=STATUS_MESSAGES.get(upload.status))

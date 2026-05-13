@@ -1,12 +1,14 @@
-
+from pathlib import Path
+import json
 
 from app.worker.celery_app import celery_app
 from app.services.s3_service import download_file_from_s3
 from app.services.file_parser import parse_upload
 from app.services.rule_engine import RuleEngine
+from app.models.rules import FieldRule
 from app.db.models import Upload, UploadStatus
 from app.db.session import SyncSessionLocal
-from app.models.validation import ValidationIssue
+from app.db.models import ValidationIssue
 
 @celery_app.task(bind=True, max_retries=3)
 def validate_emt_file(self, upload_id: str, s3_key: str, filename: str, delimiter: str = ","):
@@ -24,7 +26,11 @@ def validate_emt_file(self, upload_id: str, s3_key: str, filename: str, delimite
         rows = parse_upload(filename, file_bytes, delimiter=delimiter)
 
         # 4. Run validation
-        rule_engine = RuleEngine()
+        rules_path = Path("app/data/emt_rules.json")
+        raw = json.loads(rules_path.read_text())
+        rules = [FieldRule.model_validate(r) for r in raw]
+        rule_engine = RuleEngine(rules)
+
         validation_report = rule_engine.validate_file(rows, filename)
 
         # 5. Save validation issues
@@ -44,6 +50,8 @@ def validate_emt_file(self, upload_id: str, s3_key: str, filename: str, delimite
                 issues_to_add.append(new_issue)
 
         db.add_all(issues_to_add)
+        upload.total_rows = validation_report.total_rows
+        upload.rows_with_issues = validation_report.rows_with_issues
         upload.status = UploadStatus.COMPLETE
         db.commit()
 
