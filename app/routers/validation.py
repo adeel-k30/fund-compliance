@@ -37,7 +37,7 @@ async def validate_emt(
     s3_key = f"uploads/{current_user.client_id}/{upload_id}/{file.filename}"
 
     # Takes a synchronous (blocking) function and runs it in a separate thread, so the event loop isn't blocked
-    await asyncio.get_event_loop().run_in_executor(None, upload_file_to_s3, contents, s3_key)
+    await asyncio.get_running_loop().run_in_executor(None, upload_file_to_s3, contents, s3_key)
 
     repo = UploadRepository(db)
 
@@ -55,7 +55,7 @@ async def validate_emt(
         )
     except Exception as e:
         # clean up — delete orphaned S3 file
-        await asyncio.get_event_loop().run_in_executor(None, delete_file_from_s3, s3_key)
+        await asyncio.get_running_loop().run_in_executor(None, delete_file_from_s3, s3_key)
         raise HTTPException(status_code=500, detail="Failed to create upload record")
 
     # Queue task get task_id
