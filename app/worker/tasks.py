@@ -10,6 +10,10 @@ from app.db.models import Upload, UploadStatus
 from app.db.session import SyncSessionLocal
 from app.db.models import ValidationIssue
 
+rules_path = Path("app/data/emt_rules.json")
+_rules = [FieldRule.model_validate(r) for r in json.loads(rules_path.read_text())]
+_rule_engine = RuleEngine(_rules)
+
 @celery_app.task(bind=True, max_retries=3)
 def validate_emt_file(self, upload_id: str, s3_key: str, filename: str, delimiter: str = ","):
     db = SyncSessionLocal()
@@ -26,12 +30,7 @@ def validate_emt_file(self, upload_id: str, s3_key: str, filename: str, delimite
         rows = parse_upload(filename, file_bytes, delimiter=delimiter)
 
         # 4. Run validation
-        rules_path = Path("app/data/emt_rules.json")
-        raw = json.loads(rules_path.read_text())
-        rules = [FieldRule.model_validate(r) for r in raw]
-        rule_engine = RuleEngine(rules)
-
-        validation_report = rule_engine.validate_file(rows, filename)
+        validation_report = _rule_engine.validate_file(rows, filename)
 
         # 5. Save validation issues
         issues_to_add = []
@@ -58,14 +57,14 @@ def validate_emt_file(self, upload_id: str, s3_key: str, filename: str, delimite
     except Exception as e:
         db.rollback()
 
-        # update status to failed
-        if self.request.retries >= self.max_retries:
-            try:
-                upload = db.get(Upload, upload_id)
-                upload.status = UploadStatus.FAILED
+        try:
+            upload = db.get(Upload, upload_id)
+            if upload:
+                if self.request.retries >= self.max_retries:
+                    upload.status = UploadStatus.FAILED
                 db.commit()
-            except Exception:
-                pass # If we fail to update status, there's not much we can do
+        except Exception:
+            pass # If we fail to update status, there's not much we can do
 
         raise self.retry(exc=e, countdown=60) # Retry after 1 minute
 
