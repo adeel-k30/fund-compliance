@@ -1,3 +1,12 @@
+# Validation routes — the core workflow of the API:
+#   POST /validate/emt               Upload a file → stores in S3, queues Celery job, returns 202
+#   GET  /validate/uploads           List all uploads for the current client (paginated)
+#   GET  /validate/uploads/{id}      Fetch one upload record
+#   GET  /validate/uploads/{id}/status  Poll for processing progress and results
+#
+# All routes require a valid JWT. The current_user dependency enforces this
+# and also scopes every DB query to that user's client_id.
+
 import uuid
 import asyncio
 from fastapi import APIRouter, UploadFile, File, HTTPException, status, Form, Depends
@@ -34,9 +43,12 @@ async def validate_emt(
     # Read the files bytes
     contents = await file.read()
 
+    # S3 key structure: uploads/<client_id>/<upload_id>/<filename>
+    # Namespacing by client_id ensures files are naturally isolated per tenant.
     s3_key = f"uploads/{current_user.client_id}/{upload_id}/{file.filename}"
 
-    # Takes a synchronous (blocking) function and runs it in a separate thread, so the event loop isn't blocked
+    # upload_file_to_s3 is a synchronous (blocking) call. run_in_executor offloads it
+    # to a thread pool so the async event loop isn't blocked while the file uploads.
     await asyncio.get_running_loop().run_in_executor(None, upload_file_to_s3, contents, s3_key)
 
     repo = UploadRepository(db)

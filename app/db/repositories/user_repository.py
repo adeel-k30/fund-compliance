@@ -1,3 +1,7 @@
+# Data access layer for User (and Client, since they're created together).
+# The repository pattern keeps SQL queries out of route handlers and makes
+# the code easier to test
+
 from sqlalchemy import select
 
 from app.db.models import User, Client
@@ -7,6 +11,9 @@ class UserRepository:
         self.session = session
 
     async def create_user(self, organisation_name: str, email: str, hashed_password: str) -> User:
+        # Registration creates a Client (tenant) AND a User in one transaction.
+        # flush() sends the INSERT to Postgres without committing, so we get back
+        # the generated client.id to use as the foreign key on the new User.
         client = Client(name=organisation_name)
         self.session.add(client)
         await self.session.flush()  # ensures client.id is available before creating user

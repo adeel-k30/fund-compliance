@@ -1,3 +1,6 @@
+# Client (tenant) lookup endpoint.
+# Currently unauthenticated — in production restrict this to admin users or remove it entirely.
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 

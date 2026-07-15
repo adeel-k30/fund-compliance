@@ -1,3 +1,7 @@
+# Data access layer for Upload records and their associated ValidationIssues.
+# All queries filter by client_id — this enforces tenant isolation so one
+# client can never access another client's uploads, even with a valid token.
+
 from sqlalchemy import select
 
 from app.db.models import Upload, ValidationIssue

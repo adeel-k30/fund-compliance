@@ -1,3 +1,9 @@
+# Pydantic models representing the output of a validation run.
+# These are NOT stored directly — the rule engine returns them, and the worker
+# then converts them into ValidationIssue database rows.
+#
+# Hierarchy: ValidationReport → list[RowValidationResult] → list[ValidationIssue]
+
 from pydantic import BaseModel, Field
 
 from app.models.rules import RuleType

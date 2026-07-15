@@ -1,3 +1,6 @@
+# Entry point for the FastAPI application.
+# Registers all routers and loads the EMT rules into app state on startup.
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from pathlib import Path
@@ -14,6 +17,7 @@ app = FastAPI(title=settings.app_name,
               description="Validates fund data against regulatory requirements",
               version=settings.app_version)
 
+# Mount all route groups — each router handles a distinct area of the API
 app.include_router(validation_router)
 app.include_router(client_router)
 app.include_router(auth_router)
@@ -29,14 +33,13 @@ class RootResponse(BaseModel):
 
 @app.on_event("startup")
 async def startup_event():
-    # Load rules from JSON file
+    # Load rules once at startup and store on app.state so all requests can
+    # share the same RuleEngine without re-reading the file on every request.
     rules_path = Path("app/data/emt_rules.json")
     raw = json.loads(rules_path.read_text())
 
-    # Convert to list of FieldRule objects
     rules = [FieldRule.model_validate(r) for r in raw]
 
-    # Initialize Rule Engine with loaded rules
     app.state.emt_rules = rules
     app.state.rule_engine = RuleEngine(rules)
     print(f"Loaded {len(rules)} EMT rules")

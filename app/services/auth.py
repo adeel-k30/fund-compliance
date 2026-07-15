@@ -1,3 +1,11 @@
+# Authentication utilities: password hashing and JWT creation/verification.
+#
+# Passwords are hashed with bcrypt
+#
+# JWTs are short-lived signed tokens. The client sends one in the Authorization
+# header on every request. We verify the signature and extract the user_id from
+# the payload — no DB lookup needed just to identify who is calling.
+
 from datetime import datetime, timedelta, UTC
 from jose import jwt, JWTError
 from passlib.context import CryptContext

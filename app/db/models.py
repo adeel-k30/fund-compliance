@@ -1,3 +1,7 @@
+# SQLAlchemy ORM models — these define the actual database tables.
+# Each class maps directly to a Postgres table. Relationships tell SQLAlchemy
+# how to join tables (e.g. an Upload belongs to a Client, has many ValidationIssues).
+
 import uuid
 from enum import Enum
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Text, Boolean, Enum as SQLAlchemyEnum
@@ -13,6 +17,8 @@ class UploadStatus(str, Enum):
     FAILED = "failed"
 
 
+# The tenant. Every user and every upload belongs to one Client.
+# This is the top-level isolation boundary — one client can never see another's data.
 class Client(Base):
     __tablename__ = "clients"
 
@@ -24,6 +30,8 @@ class Client(Base):
     users = relationship("User", back_populates="client")
 
 
+# Tracks each file submission. Created as "pending" when the file arrives,
+# then updated to "processing" → "complete" (or "failed") by the Celery worker.
 class Upload(Base):
     __tablename__ = "uploads"
 
@@ -43,6 +51,8 @@ class Upload(Base):
     validation_issues = relationship("ValidationIssue", back_populates="upload")
 
 
+# One row per problem found during validation. Linked to an Upload so the
+# client can later retrieve all issues for a specific file submission.
 class ValidationIssue(Base):
     __tablename__ = "validation_issues"
 

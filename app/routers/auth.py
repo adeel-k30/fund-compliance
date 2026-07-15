@@ -1,3 +1,11 @@
+# Authentication routes: register a new organisation and log in to get a JWT.
+#
+# Flow:
+#   POST /auth/register  → creates a Client (tenant) + User, returns user details
+#   POST /auth/token     → verifies credentials, returns a JWT access token
+#
+# The JWT is then passed as "Authorization: Bearer <token>" on every protected request.
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,6 +48,8 @@ async def login(
         raise HTTPException(status_code=401, detail="Invalid credentials", headers={"WWW-Authenticate": "Bearer"})
     if not user.is_active:
         raise HTTPException(status_code=403, detail="User account is inactive")
+    # "sub" (subject) is the standard JWT claim for the entity the token represents.
+    # We also embed client_id so downstream code can use it without an extra DB lookup.
     access_token = create_access_token(data={"sub": user.id, "client_id": user.client_id})
     return Token(access_token=access_token, token_type="bearer")
 

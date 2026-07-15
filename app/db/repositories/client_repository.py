@@ -1,3 +1,7 @@
+# Data access layer for the Client (tenant) table.
+# Clients are created automatically during user registration (see UserRepository),
+# but this repository handles direct lookups by ID (e.g. for the /clients endpoint).
+
 from sqlalchemy import select
 
 from app.db.models import Client

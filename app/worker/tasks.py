@@ -1,3 +1,15 @@
+# Background Celery task that processes an uploaded EMT file end-to-end.
+#
+# The task runs in a completely separate process from the API, so it uses the
+# *synchronous* DB session (SyncSessionLocal) rather than the async one.
+#
+# Rules are loaded once at module import time (when the worker starts), not on
+# every task execution — same pattern as in main.py's startup event.
+#
+# bind=True gives the task access to `self`, which we use for retry logic.
+# max_retries=3 means a failed task will be retried up to 3 times before
+# the upload is marked as FAILED.
+
 from pathlib import Path
 import json
 
@@ -10,6 +22,7 @@ from app.db.models import Upload, UploadStatus
 from app.db.session import SyncSessionLocal
 from app.db.models import ValidationIssue
 
+# Load rules once when the worker process starts
 rules_path = Path("app/data/emt_rules.json")
 _rules = [FieldRule.model_validate(r) for r in json.loads(rules_path.read_text())]
 _rule_engine = RuleEngine(_rules)

@@ -1,3 +1,11 @@
+# Core validation logic. The RuleEngine is initialised once at startup with all
+# the rules from emt_rules.json, then reused for every file that gets processed.
+#
+# validate_row() runs in two passes so that a malformatted value can't cause a
+# misleading "mandatory field missing" error in pass 2:
+#   Pass 1 — check format (field type) and allowed values; blank invalid cells.
+#   Pass 2 — check mandatory / conditional rules against the now-cleaned row.
+
 import math
 import re
 from datetime import datetime
@@ -101,8 +109,10 @@ class RuleEngine():
         return None  # No error
 
 
-    # Checks if a given row of data satisfies the specified condition and should the rule be applied
     def _evaluate_condition(self, condition: Condition, row: dict) -> bool:
+        # Returns True if the row meets the condition, meaning the rule should fire.
+        # AND/OR operators recurse into nested conditions, allowing complex logic like:
+        # "apply this rule only if field X is 'Y' AND field Z is not empty".
         field_value = row.get(condition.field_code)
 
         if condition.operator == ConditionOperator.EQUALS:
@@ -127,7 +137,7 @@ class RuleEngine():
 
     def validate_row(self, row: dict, row_index: int) -> RowValidationResult:
         issues: list[ValidationIssue] = []
-        validated_row = dict(row) # start as a copy of the raw row
+        validated_row = dict(row)  # work on a copy so we don't mutate the original
 
         # Pass 1 — field format and allowed values
         for rule in self.rules:
@@ -208,7 +218,7 @@ class RuleEngine():
 
         return ValidationReport(
             filename=filename,
-            template_version=rows[0].get('00001', 'unknown'),
+            template_version=rows[0].get('00001', 'unknown'),  # field 00001 holds the EMT template version
             total_rows=len(rows),
             rows_with_issues=sum(1 for r in results if not r.is_valid),
             valid_rows=sum(1 for r in results if r.is_valid),
