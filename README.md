@@ -1,115 +1,65 @@
 # Fund Compliance Platform
 
-A regulatory data validation API for financial instrument submissions. It validates EMT (European MiFID Template) fund data files against configurable compliance rules, processes them asynchronously, and returns structured reports of any issues found.
+A regulatory data validation API for fund submissions. Clients upload an EMT
+(European MiFID Template) file; it's stored in S3, validated in the background
+against configurable compliance rules, and the results are saved and polled for.
 
-## What It Does
+## How it works
 
-1. A client uploads a CSV or Excel file via the REST API
-2. The file is stored in S3 and a Celery task is queued
-3. The rule engine validates each row against EMT field rules (format, allowed values, mandatory/conditional fields)
-4. Validation issues are persisted to PostgreSQL
-5. The client polls for status and retrieves the report
+1. A client registers and logs in to get a JWT.
+2. They `POST` a CSV/Excel file to `/validate/emt`.
+3. The API stores the file in S3, writes a `pending` upload record, and queues a
+   Celery job. It returns `202` immediately with an `upload_id` and `task_id`.
+4. A separate Celery worker downloads the file, runs the rule engine, saves any
+   issues, and marks the upload `complete`.
+5. The client polls `/validate/uploads/{id}/status` for progress and results.
 
-## Tech Stack
+Everything is scoped to a `client_id` (the tenant), so one customer can never
+see another's uploads.
+
+## Tech stack
 
 | Layer | Technology |
 |---|---|
-| API | FastAPI + Uvicorn |
-| Database | PostgreSQL (async via asyncpg + SQLAlchemy 2.0) |
+| API | FastAPI + Uvicorn (async) |
+| Worker | Celery 5 + Redis |
+| Database | PostgreSQL — async (asyncpg) for the API, sync (psycopg2) for the worker |
 | Migrations | Alembic |
-| Task queue | Celery 5 + Redis |
-| File storage | AWS S3 (LocalStack for local dev) |
+| File storage | S3 (LocalStack locally) |
 | Auth | JWT (OAuth2 password flow) + bcrypt |
-| Data parsing | Pandas + openpyxl |
+| Parsing | Pandas + openpyxl |
 
-## Project Structure
+## Project structure
 
 ```
 app/
-├── main.py                  # App entry point, loads EMT rules at startup
-├── core/
-│   └── config.py            # Pydantic BaseSettings (reads from .env)
+├── main.py                  # App entry point; loads EMT rules at startup
+├── core/config.py           # Settings (reads from .env)
 ├── db/
 │   ├── models.py            # SQLAlchemy ORM models
-│   ├── session.py           # Async engine and session factory
-│   ├── deps.py              # FastAPI dependencies (get_db, get_current_user)
-│   └── repositories/        # CRUD layer (User, Client, Upload)
-├── models/
-│   ├── rules.py             # Pydantic models for rule definitions
-│   └── validation.py        # Pydantic models for validation results
-├── routers/
-│   ├── auth.py              # POST /auth/register, POST /auth/token
-│   ├── validation.py        # POST /validate/emt, GET /validate/uploads/...
-│   └── client.py            # GET /clients/{client_id}
+│   ├── session.py           # Async + sync engines and session factories
+│   ├── deps.py              # get_db, get_current_user
+│   └── repositories/        # Data access (User, Client, Upload)
+├── models/                  # Pydantic models (rules, validation results)
+├── routers/                 # auth, validation, client endpoints
 ├── services/
-│   ├── rule_engine.py       # Core validation logic
-│   ├── file_parser.py       # CSV/Excel parsing, strips columns to 5-digit codes
-│   ├── s3_service.py        # S3 upload/download/delete
-│   └── auth.py              # Password hashing, JWT creation/verification
+│   ├── rule_engine.py      # Core validation logic
+│   ├── file_parser.py      # CSV/Excel parsing
+│   ├── s3_service.py       # S3 upload/download/delete
+│   └── auth.py             # Password hashing, JWT
 └── worker/
-    ├── celery_app.py        # Celery app config (Redis broker/backend)
-    └── tasks.py             # validate_emt_file Celery task
-tests/
-└── conftest.py              # Async test client
-data/
-└── emt_rules.json           # EMT field rule definitions
+    ├── celery_app.py       # Celery config
+    └── tasks.py            # validate_emt_file task
+alembic/                     # Migrations
+data/emt_rules.json          # EMT rule definitions
+tests/                       # Pytest suite
 ```
 
-## API Endpoints
+## First-time setup
 
-### Auth
+You need Python 3.13+, Docker, and the AWS CLI (for the one-time bucket step).
 
-```
-POST /auth/register
-  Body: { organisation_name, email, password }
-  Creates a new client and user account.
-
-POST /auth/token
-  Body: { username (email), password }  [OAuth2 form]
-  Returns: { access_token, token_type: "bearer" }
-```
-
-### Validation
-
-All validation endpoints require `Authorization: Bearer <token>`.
-
-```
-POST /validate/emt
-  Body: multipart/form-data — file (.csv, .xlsx, .xls), delimiter (optional, default ",")
-  Returns: { upload_id, task_id, message }
-  Status: 202 Accepted
-
-GET /validate/uploads
-  Query: skip (default 0), limit (default 20)
-  Returns: list of upload summaries
-
-GET /validate/uploads/{upload_id}
-  Returns: upload detail record
-
-GET /validate/uploads/{upload_id}/status
-  Returns: { upload_id, status, task_id, total_rows, rows_with_issues, message }
-  Statuses: pending | processing | complete | failed
-```
-
-### System
-
-```
-GET /          Returns API info and link to docs
-GET /health    Returns service health status
-```
-
-Interactive docs are available at `/docs` when the server is running.
-
-## Setup
-
-### Prerequisites
-
-- Python 3.13+
-- PostgreSQL
-- Redis
-- AWS S3 or LocalStack (for local development)
-
-### Install
+**1. Install dependencies**
 
 ```bash
 python -m venv .venv
@@ -117,66 +67,121 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Configure
-
-Copy the example env file and fill in your values:
+**2. Create the infrastructure containers** (run once — these commands *create*
+the containers; you start them with `docker start` afterwards)
 
 ```bash
-cp .env.example .env
+docker run -d --name fund-compliance-db -p 5433:5432 \
+  -e POSTGRES_USER=funduser -e POSTGRES_PASSWORD=devpassword \
+  -e POSTGRES_DB=fundcompliance postgres:16
+
+docker run -d --name fund-compliance-redis -p 6379:6379 redis:7
+
+docker run -d --name fund-compliance-localstack -p 4566:4566 \
+  -e SERVICES=s3 localstack/localstack
 ```
 
-Key variables:
+**3. Create the S3 bucket and the test database** (one time)
+
+```bash
+aws --endpoint-url http://localhost:4566 s3 mb s3://fund-compliance-uploads
+
+docker exec -it fund-compliance-db \
+  createdb -U funduser fundcompliance_test
+```
+
+**4. Create your `.env`** in the project root
 
 ```env
-DATABASE_URL=postgresql+asyncpg://funduser:password@localhost:5433/fundcompliance
+DATABASE_URL=postgresql+asyncpg://funduser:devpassword@localhost:5433/fundcompliance
 REDIS_URL=redis://localhost:6379/0
 S3_BUCKET_NAME=fund-compliance-uploads
+S3_ENDPOINT_URL=http://localhost:4566   # remove for real AWS
 
-# Leave set for LocalStack local dev; remove for real AWS
-S3_ENDPOINT_URL=http://localhost:4566
-
-JWT_SECRET_KEY=your-secret-key
+DEV_CLIENT_ID=<any-uuid>                 # required — app won't start without it
+JWT_SECRET_KEY=change-me
 JWT_EXPIRY_MINUTES=30
 ```
 
-### Run Migrations
+**5. Apply migrations**
 
 ```bash
 alembic upgrade head
 ```
 
-### Start the API
+## Running the app day to day
 
 ```bash
+# 1. Start the infrastructure (already created above)
+docker start fund-compliance-db fund-compliance-redis fund-compliance-localstack
+
+# 2. Apply migrations (only needed when they've changed)
+alembic upgrade head
+
+# 3. Start the API
 uvicorn app.main:app --reload
-```
 
-### Start the Celery Worker
-
-In a separate terminal:
-
-```bash
+# 4. Start the worker (separate terminal)
 celery -A app.worker.celery_app worker --loglevel=info
 ```
 
-## Running Tests
+API docs: http://localhost:8000/docs · Health check: http://localhost:8000/health
 
-Tests use an in-memory SQLite database and do not require external services.
+## API endpoints
 
-```bash
-pytest                          # Run all tests
-pytest -v                       # Verbose output
-pytest --cov=app                # With coverage report
+**Auth**
+
+```
+POST /auth/register    { organisation_name, email, password }  → creates client + user
+POST /auth/token       { username (email), password }          → { access_token, token_type }
 ```
 
-## EMT Rule Engine
+**Validation** (all require `Authorization: Bearer <token>`)
 
-Rules are loaded from `data/emt_rules.json` at startup. Each rule defines:
+```
+POST /validate/emt              multipart: file (.csv/.xlsx/.xls), delimiter (optional)
+                                → 202 { upload_id, task_id, message }
+GET  /validate/uploads          → list of uploads (paginated: skip, limit)
+GET  /validate/uploads/{id}     → one upload
+GET  /validate/uploads/{id}/status
+                                → { status, total_rows, rows_with_issues, ... }
+```
 
-- `field_code` — 5-digit EMT field identifier
-- `field_type` — one of `string`, `integer`, `decimal`, `percentage`, `date`, `datetime`, `boolean`, `isin`, `lei`
+## Migrations
+
+```bash
+alembic upgrade head                              # apply all pending migrations
+alembic revision --autogenerate -m "description"  # create a new migration from model changes
+alembic downgrade -1                              # roll back one migration
+```
+
+Always review autogenerated migrations before committing them.
+
+## Tests
+
+Tests run against the Postgres **test** database (`fundcompliance_test`) created
+in setup — so the `fund-compliance-db` container must be running. They don't need
+Redis or S3; those are mocked. Each test runs in a transaction that's rolled back,
+so the database stays clean between tests.
+
+```bash
+docker start fund-compliance-db   # if not already running
+pytest                            # all tests
+pytest -v                         # verbose
+pytest --cov=app                  # with coverage
+```
+
+## Rule engine
+
+Rules live in `data/emt_rules.json` and are loaded at startup. Each rule defines:
+
+- `field_code` — 5-digit EMT field id
+- `field_type` — `string`, `integer`, `decimal`, `percentage`, `date`, `datetime`, `boolean`, `isin`, or `lei`
 - `rule_type` — `format`, `allowed_values`, `expect_value`, `expect_empty`, or `custom`
 - `allowed_values` — optional list of permitted values
-- `condition` — optional conditional logic (supports `eq`, `neq`, `in_set`, `not_in_set`, `is_empty`, `is_not_empty`, `and`, `or`)
+- `condition` — optional logic (`eq`, `neq`, `in_set`, `not_in_set`, `is_empty`, `is_not_empty`, `and`, `or`)
 
-Validation issues are stored per row with the field code, rule type, and a human-readable message.
+Validation runs in two passes per row: first format and allowed-values checks
+(which blank out any invalid cell), then mandatory and conditional rules against
+the cleaned row. Issues are saved per row with the field code, rule type, and a
+human-readable message.
