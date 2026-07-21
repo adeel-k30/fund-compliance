@@ -1,0 +1,27 @@
+# Python bytecode and caches
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Secrets
+.env
+.env.*
+
+# Git history
+.git/
+.gitignore
+
+# Tests and their caches
+tests/
+.pytest_cache/
+
+# Editor and OS files
+.idea/
+.vscode/
+.DS_Store
+
+# Docs and CI config
+*.md
+.github/
