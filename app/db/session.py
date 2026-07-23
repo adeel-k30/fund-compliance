@@ -14,13 +14,12 @@ from sqlalchemy import create_engine
 from app.core.config import settings
 
 # Async engine + session for FastAPI route handlers
-engine = create_async_engine(settings.database_url, echo=True)
+engine = create_async_engine(settings.async_database_url, echo=True)
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 Base = declarative_base()  # All ORM models inherit from this
 
 # Sync engine + session for Celery worker tasks
-sync_engine = create_engine(
-    settings.database_url.replace("+asyncpg", "+psycopg2")
-)
+sync_engine = create_engine(settings.sync_database_url)
+
 SyncSessionLocal = sessionmaker(bind=sync_engine)
