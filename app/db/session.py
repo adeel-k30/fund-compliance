@@ -4,8 +4,8 @@
 #   - The API is async (FastAPI + asyncpg), so it needs an async engine.
 #   - Celery tasks are synchronous, so they use a standard sync engine (psycopg2).
 #
-# The DATABASE_URL uses "+asyncpg" as its driver — we swap it to "+psycopg2"
-# for the sync engine so we don't need a second env variable.
+# The raw DATABASE_URL has no driver specified — the config properties
+# inject the correct driver (+asyncpg or +psycopg2) for each engine.
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
