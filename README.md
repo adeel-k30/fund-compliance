@@ -74,7 +74,7 @@ the two that don't:
 
 ## First-time setup
 
-You need Python 3.13+, Docker, and the AWS CLI (for the one-time bucket step).
+You need Python 3.13+, Docker, and the AWS CLI (for creating the S3 bucket).
 
 **1. Install dependencies**
 
@@ -109,17 +109,12 @@ aws configure
 # Default output format: (press enter)
 ```
 
-**4. Create the S3 bucket and the test database** (one time)
+**4. Create the test database** (one time)
 
 ```bash
-aws --endpoint-url http://localhost:4566 s3 mb s3://fund-compliance-uploads
-
 docker exec -it fund-compliance-db \
   createdb -U funduser fundcompliance_test
 ```
-
-LocalStack's free tier keeps state in memory. `docker start`/`stop` preserves the
-bucket, but recreating the container loses it — just run `s3 mb` again.
 
 **5. Create your `.env`** in the project root (copy `.env.example`)
 
@@ -137,6 +132,9 @@ Everything else falls back to the development defaults in `config.py`
 alembic upgrade head
 ```
 
+The S3 bucket is created as part of the daily startup below, not here — see the
+note on LocalStack persistence.
+
 ## Running the app day to day
 
 ```bash
@@ -146,13 +144,16 @@ source .venv/bin/activate
 # 2. Start the infrastructure (already created above)
 docker start fund-compliance-db fund-compliance-redis fund-compliance-localstack
 
-# 3. Apply migrations (after any git pull)
+# 3. Recreate the S3 bucket (LocalStack loses it on restart)
+aws --endpoint-url http://localhost:4566 s3 mb s3://fund-compliance-uploads
+
+# 4. Apply migrations (after any git pull)
 alembic upgrade head
 
-# 4. Start the API
+# 5. Start the API
 uvicorn app.main:app --reload
 
-# 5. Start the worker (separate terminal)
+# 6. Start the worker (separate terminal)
 celery -A app.worker.celery_app worker --loglevel=info --pool=solo
 ```
 
