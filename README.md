@@ -28,13 +28,16 @@ see another's uploads.
 | File storage | S3 (LocalStack locally) |
 | Auth | JWT (OAuth2 password flow) + bcrypt |
 | Parsing | Pandas + openpyxl |
+| Container | Docker (one image runs both API and worker) |
+| Deployment | Render (Blueprint in `render.yaml`) |
 
 ## Project structure
 
 ```
 app/
 ├── main.py                  # App entry point; loads EMT rules at startup
-├── core/config.py           # Settings (reads from .env)
+├── core/config.py           # Settings (reads from .env / environment)
+├── data/emt_rules.json      # EMT rule definitions
 ├── db/
 │   ├── models.py            # SQLAlchemy ORM models
 │   ├── session.py           # Async + sync engines and session factories
@@ -43,17 +46,31 @@ app/
 ├── models/                  # Pydantic models (rules, validation results)
 ├── routers/                 # auth, validation, client endpoints
 ├── services/
-│   ├── rule_engine.py      # Core validation logic
-│   ├── file_parser.py      # CSV/Excel parsing
-│   ├── s3_service.py       # S3 upload/download/delete
-│   └── auth.py             # Password hashing, JWT
+│   ├── rule_engine.py       # Core validation logic
+│   ├── file_parser.py       # CSV/Excel parsing
+│   ├── s3_service.py        # S3 upload/download/delete
+│   └── auth.py              # Password hashing, JWT
 └── worker/
-    ├── celery_app.py       # Celery config
-    └── tasks.py            # validate_emt_file task
+    ├── celery_app.py        # Celery config
+    └── tasks.py             # validate_emt_file task
 alembic/                     # Migrations
-data/emt_rules.json          # EMT rule definitions
 tests/                       # Pytest suite
+Dockerfile                   # Production image (API + worker)
+render.yaml                  # Render Blueprint (infrastructure as code)
 ```
+
+## Configuration
+
+All settings live in `app/core/config.py` as a Pydantic `Settings` class. Values
+are read from environment variables first, then `.env`, then the class default.
+
+Most fields have development-friendly defaults, so locally you only need to set
+the two that don't:
+
+| Variable | Why it's required locally |
+|---|---|
+| `JWT_SECRET_KEY` | No default — the app refuses to start without it, so a missing secret can never silently fall back to a hardcoded one. |
+| `S3_ENDPOINT_URL` | Defaults to unset, which means "use real AWS". Point it at LocalStack for local development. |
 
 ## First-time setup
 
@@ -73,15 +90,26 @@ the containers; you start them with `docker start` afterwards)
 ```bash
 docker run -d --name fund-compliance-db -p 5433:5432 \
   -e POSTGRES_USER=funduser -e POSTGRES_PASSWORD=devpassword \
-  -e POSTGRES_DB=fundcompliance postgres:16
+  -e POSTGRES_DB=fundcompliance postgres:15
 
 docker run -d --name fund-compliance-redis -p 6379:6379 redis:7
 
 docker run -d --name fund-compliance-localstack -p 4566:4566 \
-  -e SERVICES=s3 localstack/localstack
+  -e SERVICES=s3 localstack/localstack:3
 ```
 
-**3. Create the S3 bucket and the test database** (one time)
+**3. Configure dummy AWS credentials** (one time). LocalStack ignores the values,
+but the AWS CLI refuses to send a request without them.
+
+```bash
+aws configure
+# AWS Access Key ID:     test
+# AWS Secret Access Key: test
+# Default region name:   us-east-1
+# Default output format: (press enter)
+```
+
+**4. Create the S3 bucket and the test database** (one time)
 
 ```bash
 aws --endpoint-url http://localhost:4566 s3 mb s3://fund-compliance-uploads
@@ -90,20 +118,20 @@ docker exec -it fund-compliance-db \
   createdb -U funduser fundcompliance_test
 ```
 
-**4. Create your `.env`** in the project root
+LocalStack's free tier keeps state in memory. `docker start`/`stop` preserves the
+bucket, but recreating the container loses it — just run `s3 mb` again.
+
+**5. Create your `.env`** in the project root (copy `.env.example`)
 
 ```env
-DATABASE_URL=postgresql+asyncpg://funduser:devpassword@localhost:5433/fundcompliance
-REDIS_URL=redis://localhost:6379/0
-S3_BUCKET_NAME=fund-compliance-uploads
-S3_ENDPOINT_URL=http://localhost:4566   # remove for real AWS
-
-DEV_CLIENT_ID=<any-uuid>                 # required — app won't start without it
-JWT_SECRET_KEY=change-me
-JWT_EXPIRY_MINUTES=30
+JWT_SECRET_KEY=local-dev-secret
+S3_ENDPOINT_URL=http://localhost:4566
 ```
 
-**5. Apply migrations**
+Everything else falls back to the development defaults in `config.py`
+(Postgres on 5433, Redis on 6379, bucket `fund-compliance-uploads`).
+
+**6. Apply migrations**
 
 ```bash
 alembic upgrade head
@@ -112,17 +140,20 @@ alembic upgrade head
 ## Running the app day to day
 
 ```bash
-# 1. Start the infrastructure (already created above)
+# 1. Activate the virtualenv
+source .venv/bin/activate
+
+# 2. Start the infrastructure (already created above)
 docker start fund-compliance-db fund-compliance-redis fund-compliance-localstack
 
-# 2. Apply migrations (only needed when they've changed)
+# 3. Apply migrations (after any git pull)
 alembic upgrade head
 
-# 3. Start the API
+# 4. Start the API
 uvicorn app.main:app --reload
 
-# 4. Start the worker (separate terminal)
-celery -A app.worker.celery_app worker --loglevel=info
+# 5. Start the worker (separate terminal)
+celery -A app.worker.celery_app worker --loglevel=info --pool=solo
 ```
 
 API docs: http://localhost:8000/docs · Health check: http://localhost:8000/health
@@ -153,6 +184,7 @@ GET  /validate/uploads/{id}/status
 alembic upgrade head                              # apply all pending migrations
 alembic revision --autogenerate -m "description"  # create a new migration from model changes
 alembic downgrade -1                              # roll back one migration
+alembic current                                   # show the applied revision
 ```
 
 Always review autogenerated migrations before committing them.
@@ -160,9 +192,9 @@ Always review autogenerated migrations before committing them.
 ## Tests
 
 Tests run against the Postgres **test** database (`fundcompliance_test`) created
-in setup — so the `fund-compliance-db` container must be running. They don't need
-Redis or S3; those are mocked. Each test runs in a transaction that's rolled back,
-so the database stays clean between tests.
+in setup, so the `fund-compliance-db` container must be running. They don't need
+Redis or S3 — those are mocked. Each test runs in a transaction that's rolled
+back, so the database stays clean between tests.
 
 ```bash
 docker start fund-compliance-db   # if not already running
@@ -173,7 +205,7 @@ pytest --cov=app                  # with coverage
 
 ## Rule engine
 
-Rules live in `data/emt_rules.json` and are loaded at startup. Each rule defines:
+Rules live in `app/data/emt_rules.json` and are loaded at startup. Each rule defines:
 
 - `field_code` — 5-digit EMT field id
 - `field_type` — `string`, `integer`, `decimal`, `percentage`, `date`, `datetime`, `boolean`, `isin`, or `lei`
