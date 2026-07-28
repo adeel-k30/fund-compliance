@@ -33,7 +33,7 @@ services:
     name: fund-compliance-worker
     runtime: docker
     dockerfilePath: ./Dockerfile
-    dockerCommand: "celery -A app.worker.celery_app worker --loglevel=info"
+    dockerCommand: "celery -A app.worker.celery_app worker --loglevel=info --pool=solo"
     plan: starter
     envVars:
       - key: DATABASE_URL
