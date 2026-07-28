@@ -3,7 +3,8 @@ services:
     name: fund-compliance-api-adeelkhan
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: free
+    plan: starter
+    preDeployCommand: "alembic upgrade head"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -33,7 +34,7 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerCommand: "celery -A app.worker.celery_app worker --loglevel=info"
-    plan: free
+    plan: starter
     envVars:
       - key: DATABASE_URL
         fromDatabase:
