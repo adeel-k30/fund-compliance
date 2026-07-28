@@ -46,7 +46,7 @@ services:
           property: connectionString
       - key: JWT_SECRET_KEY
         fromService:
-          name: fund-compliance-api
+          name: fund-compliance-api-adeelkhan
           type: web
           envVarKey: JWT_SECRET_KEY
       - key: APP_ENV
