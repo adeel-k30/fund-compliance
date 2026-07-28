@@ -1,10 +1,9 @@
 services:
   - type: web
-    name: fund-compliance-api
+    name: fund-compliance-api-adeelkhan
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
-    preDeployCommand: "alembic upgrade head"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
