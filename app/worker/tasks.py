@@ -27,6 +27,8 @@ rules_path = Path("app/data/emt_rules.json")
 _rules = [FieldRule.model_validate(r) for r in json.loads(rules_path.read_text())]
 _rule_engine = RuleEngine(_rules)
 
+CHUNK_SIZE = 500
+
 @celery_app.task(bind=True, max_retries=3)
 def validate_emt_file(self, upload_id: str, s3_key: str, filename: str, delimiter: str = ","):
     db = SyncSessionLocal()
@@ -36,34 +38,47 @@ def validate_emt_file(self, upload_id: str, s3_key: str, filename: str, delimite
         upload.status = UploadStatus.PROCESSING
         db.commit()
 
-        # 2. Download file bytes from s3
-        file_bytes = download_file_from_s3(s3_key)
+        # Clear any issues from a previous partial run if it is a retry so  we don't end up with duplicates.
+        db.query(ValidationIssue).filter(ValidationIssue.upload_id == upload_id).delete()
+        db.commit()
 
-        # 3. Parse the file
+        # 2. Download file bytes from s3 and parse
+        file_bytes = download_file_from_s3(s3_key)
         rows = parse_upload(filename, file_bytes, delimiter=delimiter)
 
-        # 4. Run validation
-        validation_report = _rule_engine.validate_file(rows, filename)
+        # 3. Validate and save in chunks
+        total_rows = len(rows)
+        rows_with_issues = 0
 
-        # 5. Save validation issues
-        issues_to_add = []
-        for row in validation_report.results:
-            for issue in row.issues:
-                new_issue = ValidationIssue(
-                    upload_id=upload_id,
-                    row_index=row.row_index,
-                    isin=row.isin,
-                    instrument_name=row.instrument_name,
-                    field_code=issue.field_code,
-                    field_label=issue.field_label,
-                    rule_type=issue.rule_type.value,
-                    message=issue.message
-                )
-                issues_to_add.append(new_issue)
+        for start in range(0, total_rows, CHUNK_SIZE):
+            chunk = rows[start: start + CHUNK_SIZE]
+            chunk_issues = []
 
-        db.add_all(issues_to_add)
-        upload.total_rows = validation_report.total_rows
-        upload.rows_with_issues = validation_report.rows_with_issues
+            for offset, row in enumerate(chunk):
+                row_index = start + offset
+                result = _rule_engine.validate_row(row, row_index)
+
+                if result.issues:
+                    rows_with_issues += 1
+
+                for issue in result.issues:
+                    chunk_issues.append(ValidationIssue(
+                        upload_id=upload_id,
+                        row_index=result.row_index,
+                        isin=result.isin,
+                        instrument_name=result.instrument_name,
+                        field_code=issue.field_code,
+                        field_label=issue.field_label,
+                        rule_type=issue.rule_type.value,
+                        message=issue.message,
+                    ))
+
+            db.add_all(chunk_issues)
+            db.commit()
+
+        # 4. Mark complete
+        upload.total_rows = total_rows
+        upload.rows_with_issues = rows_with_issues
         upload.status = UploadStatus.COMPLETE
         db.commit()
 
