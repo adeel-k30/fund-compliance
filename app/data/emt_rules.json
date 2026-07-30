@@ -584,7 +584,7 @@
   {
     "field_code": "07130",
     "label": "Financial_Instrument_Transaction_Costs_Ex_Ante",
-    "field_type": "percentage",
+    "field_type": "decimal",
     "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
@@ -816,7 +816,7 @@
   {
     "field_code": "08070",
     "label": "Financial_Instrument_Transaction_Costs_Ex_Post",
-    "field_type": "percentage",
+    "field_type": "decimal",
     "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
