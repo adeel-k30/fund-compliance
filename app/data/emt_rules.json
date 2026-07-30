@@ -411,7 +411,7 @@
   {
     "field_code": "05080",
     "label": "Minimum_Recommended_Holding_Period",
-    "field_type": "string",
+    "field_type": "integer",
     "allowed_values": null,
     "rule_type": "expect_value",
     "condition": {
