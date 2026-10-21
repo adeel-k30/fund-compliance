@@ -43,3 +43,27 @@ class UploadStatus(BaseModel):
     total_rows: int | None
     rows_with_issues: int | None
     message: str | None
+
+
+class ValidationIssueSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    row_index: int
+    field_code: str
+    field_label: str
+    rule_type: str
+    message: str
+
+
+class IsinIssueGroup(BaseModel):
+    isin: str | None
+    instrument_name: str | None
+    issues: list[ValidationIssueSummary]
+
+
+class UploadIssuesResponse(BaseModel):
+    # Returned by GET /validate/uploads/{id}/issues
+    upload_id: str
+    total_issues: int
+    groups: list[IsinIssueGroup]

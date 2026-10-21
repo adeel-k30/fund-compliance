@@ -16,7 +16,7 @@ from app.services.s3_service import upload_file_to_s3, delete_file_from_s3
 from app.db.deps import get_db, get_current_user
 from app.db.models import UploadStatus, User
 from app.db.repositories.upload_repository import UploadRepository
-from app.schemas.upload import UploadSummary, UploadAccepted, UploadStatus as UploadStatusSchema, STATUS_MESSAGES
+from app.schemas.upload import UploadSummary, UploadAccepted, UploadStatus as UploadStatusSchema, STATUS_MESSAGES, UploadIssuesResponse, IsinIssueGroup, ValidationIssueSummary
 from app.worker.tasks import validate_emt_file
 
 router = APIRouter(
@@ -134,3 +134,35 @@ async def get_upload_status(
         total_rows=upload.total_rows,
         rows_with_issues=upload.rows_with_issues,
         message=STATUS_MESSAGES.get(upload.status))
+
+
+@router.get("/uploads/{upload_id}/issues")
+async def get_upload_issues(
+        upload_id: str,
+        current_user: User = Depends(get_current_user),
+        db: AsyncSession = Depends(get_db)
+) -> UploadIssuesResponse:
+
+    repo = UploadRepository(db)
+    issues = await repo.get_issues_by_upload_id(upload_id, client_id=current_user.client_id)
+
+    if issues is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Upload not found")
+
+    # Group issues by ISIN. Issues with no ISIN are grouped together under None.
+    groups: dict[str | None, IsinIssueGroup] = {}
+    for issue in issues:
+        key = issue.isin
+        if key not in groups:
+            groups[key] = IsinIssueGroup(
+                isin=issue.isin,
+                instrument_name=issue.instrument_name,
+                issues=[]
+            )
+        groups[key].issues.append(ValidationIssueSummary.model_validate(issue))
+
+    return UploadIssuesResponse(
+        upload_id=upload_id,
+        total_issues=len(issues),
+        groups=list(groups.values())
+    )

@@ -73,6 +73,20 @@ class UploadRepository:
         result = await self.session.execute(select(Upload).where(Upload.client_id == client_id).offset(skip).limit(limit).order_by(Upload.created_at.desc()))
         return result.scalars().all()
 
+    async def get_issues_by_upload_id(self, upload_id: str, client_id: str) -> list[ValidationIssue] | None:
+        # Verify the upload belongs to this client before returning any issues.
+        # Returns None if the upload doesn't exist or belongs to a different client (→ 404).
+        upload = await self.get_upload_by_id(upload_id, client_id)
+        if not upload:
+            return None
+
+        result = await self.session.execute(
+            select(ValidationIssue)
+            .where(ValidationIssue.upload_id == upload_id)
+            .order_by(ValidationIssue.isin, ValidationIssue.row_index)
+        )
+        return result.scalars().all()
+
 
 
 
