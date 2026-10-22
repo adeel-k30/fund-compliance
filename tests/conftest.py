@@ -1,9 +1,13 @@
+import base64
+import json
 import os
+import uuid
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from app.db.session import Base
+from app.db.models import Upload, UploadStatus
 from app.main import app
 from app.db.deps import get_db
 
@@ -12,7 +16,6 @@ TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
     "postgresql+asyncpg://funduser:devpassword@localhost:5433/fundcompliance_test"
 )
-
 
 @pytest_asyncio.fixture(scope="session")
 async def test_engine():
@@ -105,4 +108,45 @@ async def auth_headers(client, registered_user):
     assert response.status_code == 200
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture
+async def auth_client_id(client, registered_user) -> str:
+    """
+    Logs in and decodes the JWT to extract the client_id claim.
+    Needed when tests have to seed DB rows directly against the right tenant.
+    """
+    response = await client.post("/auth/token", data={
+        "username": registered_user["email"],
+        "password": registered_user["password"]
+    })
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    payload_b64 = token.split(".")[1]
+    payload_b64 += "=" * (-len(payload_b64) % 4)  # restore base64 padding
+    claims = json.loads(base64.urlsafe_b64decode(payload_b64))
+    return claims["client_id"]
+
+
+@pytest_asyncio.fixture
+async def seeded_upload(db_session, auth_client_id) -> Upload:
+    """
+    Inserts a minimal Upload row for the current user's client.
+    Uses flush() so the row is visible within the test's transaction
+    but is rolled back automatically when the test ends.
+    """
+    upload = Upload(
+        id=str(uuid.uuid4()),
+        client_id=auth_client_id,
+        filename="test_emt.xlsx",
+        template_type="EMT",
+        template_version="3.1",
+        total_rows=10,
+        rows_with_issues=2,
+        status=UploadStatus.COMPLETE,
+        s3_key="test/test_emt.xlsx",
+    )
+    db_session.add(upload)
+    await db_session.flush()
+    return upload
 
